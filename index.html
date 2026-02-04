@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAILY CHICKEN SHOP | Varanasi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --main-red: #cc0000; --dark-gray: #1a1a1a; --whatsapp-green: #25D366; --gold: #ffd700; }
+        body { font-family: 'Roboto', sans-serif; background: #f4f4f4; margin: 0; }
+        .blink-header { background: var(--dark-gray); color: white; text-align: center; padding: 20px; border-bottom: 5px solid var(--main-red); }
+        .blink-name { font-family: 'Oswald', sans-serif; font-size: 2.5rem; animation: rainbow 3s infinite; text-transform: uppercase; }
+        @keyframes rainbow { 0%, 100% { color: #ff0000; } 50% { color: #00ff00; } }
+        .container { max-width: 1100px; margin: auto; padding: 20px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; }
+        .card img { width: 100%; height: 250px; object-fit: cover; }
+        .btn-whatsapp { background: var(--whatsapp-green); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; display: block; margin: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="blink-header">
+    <h1 class="blink-name">DAILY CHICKEN SHOP</h1>
+    <p style="color:var(--gold)">वाराणसी की ताज़ा और शुद्ध चिकन शॉप</p>
+</div>
+
+<div class="container">
+    <div id="display-grid" class="card-grid">Loading items...</div>
+</div>
+
+<script>
+    // 👇 Yahan apna wo CSV link paste karein jo 'Publish to web' se mila hai
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/16OD8xpPTpdNySEUPbL6VDe5gyfGbSrlDIkyFBfUEu-o/edit?usp=drivesdk";
+    const MY_PHONE = "919123547766";
+
+    async function loadShop() {
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
+            const rows = data.split('\n').slice(1);
+            const grid = document.getElementById('display-grid');
+            grid.innerHTML = "";
+
+            rows.forEach(row => {
+                const cols = row.split(',');
+                if (cols.length >= 3) {
+                    const name = cols[0].trim();
+                    const old = cols[1].trim();
+                    const price = cols[2].trim();
+                    const img = cols[3] ? cols[3].trim() : "https://via.placeholder.com/250";
+
+                    grid.innerHTML += `
+                        <div class="card">
+                            <img src="${img}">
+                            <h3 style="margin-top:10px;">${name}</h3>
+                            <p><span style="text-decoration:line-through; color:gray;">₹${old}</span> <b style="color:red; font-size:1.5rem;">₹${price}</b></p>
+                            <a href="https://wa.me/${MY_PHONE}?text=Namaste! Mujhe ${name} order karna hai." class="btn-whatsapp" target="_blank">Order on WhatsApp</a>
+                        </div>`;
+                }
+            });
+        } catch (e) { grid.innerHTML = "Sheet link check karein!"; }
+    }
+    loadShop();
+</script>
+</body>
+</html>
