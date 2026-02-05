@@ -8,60 +8,63 @@
     <style>
         :root { --main-red: #cc0000; --dark-gray: #1a1a1a; --whatsapp-green: #25D366; --gold: #ffd700; }
         body { font-family: 'Roboto', sans-serif; background: #f4f4f4; margin: 0; }
-        .blink-header { background: var(--dark-gray); color: white; text-align: center; padding: 20px; border-bottom: 5px solid var(--main-red); }
-        .blink-name { font-family: 'Oswald', sans-serif; font-size: 2.5rem; animation: rainbow 3s infinite; text-transform: uppercase; }
+        .header { background: var(--dark-gray); color: white; text-align: center; padding: 20px; border-bottom: 5px solid var(--main-red); }
+        .blink-name { font-family: 'Oswald', sans-serif; font-size: 2.5rem; animation: rainbow 3s infinite; text-transform: uppercase; margin: 0; }
         @keyframes rainbow { 0%, 100% { color: #ff0000; } 50% { color: #00ff00; } }
         .container { max-width: 1100px; margin: auto; padding: 20px; }
         .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; padding-bottom: 15px; }
         .card img { width: 100%; height: 250px; object-fit: cover; }
-        .btn-whatsapp { background: var(--whatsapp-green); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; display: block; margin: 15px; }
+        .btn-whatsapp { background: var(--whatsapp-green); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; display: block; margin: 10px 20px; }
     </style>
 </head>
 <body>
 
-<div class="blink-header">
+<div class="header">
     <h1 class="blink-name">DAILY CHICKEN SHOP</h1>
-    <p style="color:var(--gold)">वाराणसी की ताज़ा और शुद्ध चिकन शॉप</p>
+    <p style="color:var(--gold); margin: 5px 0;">वाराणसी की ताज़ा और शुद्ध चिकन शॉप</p>
 </div>
 
 <div class="container">
-    <div id="display-grid" class="card-grid">Loading items...</div>
+    <div id="display-grid" class="card-grid">Samaan load ho raha hai...</div>
 </div>
 
 <script>
-    // 👇 Yahan apna wo CSV link paste karein jo 'Publish to web' se mila hai
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/16OD8xpPTpdNySEUPbL6VDe5gyfGbSrlDIkyFBfUEu-o/edit?usp=drivesdk";
+    // 👇 Apna CSV link yahan paste karein
+    const SHEET_URL = "PASTE_YOUR_CSV_LINK_HERE";
     const MY_PHONE = "919123547766";
 
-    async function loadShop() {
+    async function loadData() {
         try {
-            const res = await fetch(SHEET_URL);
-            const data = await res.text();
-            const rows = data.split('\n').slice(1);
+            const response = await fetch(SHEET_URL);
+            const data = await response.text();
+            
+            // CSV data ko rows mein todna
+            const rows = data.split('\n').map(row => row.split(','));
             const grid = document.getElementById('display-grid');
             grid.innerHTML = "";
 
-            rows.forEach(row => {
-                const cols = row.split(',');
-                if (cols.length >= 3) {
-                    const name = cols[0].trim();
-                    const old = cols[1].trim();
-                    const price = cols[2].trim();
-                    const img = cols[3] ? cols[3].trim() : "https://via.placeholder.com/250";
-
+            // Pehli row (Header) ko chhod kar baki items dikhana
+            for (let i = 1; i < rows.length; i++) {
+                const [name, oldPrice, price, img] = rows[i];
+                if (name && price) {
                     grid.innerHTML += `
                         <div class="card">
-                            <img src="${img}">
-                            <h3 style="margin-top:10px;">${name}</h3>
-                            <p><span style="text-decoration:line-through; color:gray;">₹${old}</span> <b style="color:red; font-size:1.5rem;">₹${price}</b></p>
-                            <a href="https://wa.me/${MY_PHONE}?text=Namaste! Mujhe ${name} order karna hai." class="btn-whatsapp" target="_blank">Order on WhatsApp</a>
+                            <img src="${img ? img.trim() : 'https://via.placeholder.com/250'}" onerror="this.src='https://via.placeholder.com/250'">
+                            <h3 style="margin: 10px 0;">${name.trim()}</h3>
+                            <p>
+                                <span style="text-decoration:line-through; color:gray;">₹${oldPrice.trim()}</span> 
+                                <b style="color:red; font-size:1.5rem; margin-left:10px;">₹${price.trim()}</b>
+                            </p>
+                            <a href="https://wa.me/${MY_PHONE}?text=Namaste! Mujhe ${name.trim()} chahiye." class="btn-whatsapp" target="_blank">Order on WhatsApp</a>
                         </div>`;
                 }
-            });
-        } catch (e) { grid.innerHTML = "Sheet link check karein!"; }
+            }
+        } catch (error) {
+            document.getElementById('display-grid').innerHTML = "Data load nahi ho paya. Link check karein!";
+        }
     }
-    loadShop();
+    loadData();
 </script>
 </body>
 </html>
